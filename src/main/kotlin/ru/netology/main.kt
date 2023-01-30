@@ -1,15 +1,15 @@
 package ru.netology
 
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+//import java.time.Instant
+//import java.time.format.DateTimeFormatter
 
 //  расчет текущего времени
 val timestamp = System.currentTimeMillis()
-val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-val sdfFormat = sdf.format(timestamp)
+//val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+//val sdfFormat = sdf.format(timestamp)
 
 //  расчет World Time API
-val timestampApi = DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp / 1000))
+//val timestampApi = DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp / 1000))
 
 class NoteNotFoundException(message: String) : RuntimeException(message)
 class CommentNotFoundException(message: String) : RuntimeException(message)
@@ -67,44 +67,37 @@ object NoteService {
         notes.also { it.add(Note(++note_id, owner_id = user_id, title = title, text = text)) }.run { return note_id }
     }
 
-    fun getById(note_id: Int) = notes.find {it.note_id == note_id} ?: throw NoteNotFoundException("Note $note_id not found")
+    fun getById(note_id: Int) =
+        notes.find { it.note_id == note_id } ?: throw NoteNotFoundException("Note $note_id not found")
 
-    fun get(owner_id: Int, sort: Int = 0): MutableList<Note> {
-        for (note in notes) {
-            if (note.owner_id == owner_id) {
-                getNotes.add(note)
-                getNotes.sortBy { it.date }
-                getNotes.reverse()
-                if (sort == 1) getNotes.reverse()
-            }
-        }
-        return getNotes
+    fun get(owner_id: Int, sort: Int = 1): MutableList<Note> {
+        notes.filter { it.owner_id == owner_id }.forEach {getNotes.add(it)}.also { getNotes.sortBy { it.date } }.
+        also { if (sort == 0) getNotes.reverse() }.run { return getNotes }
     }
 
     fun edit(note_id: Int, title: String, text: String): Boolean {
-        notes.find { it.note_id == note_id }?.also { it.title = title }?.also { it.text = text }?.
-        run { return true } ?: throw NoteNotFoundException("Note $note_id not found")
+        notes.find { it.note_id == note_id }?.also { it.title = title }?.also { it.text = text }?.run { return true } ?: throw NoteNotFoundException("Note $note_id not found")
     }
 
     fun delete(note_id: Int): Boolean {     // Удаляет из списка заметку и отправляет его в архив
-        notes.find { it.note_id == note_id }?.also { it.isDeleted = true }?.also { notes.remove(it) }?.let { deletedNotes.add(it) }?.
-        run { return true } ?: throw NoteNotFoundException("Note $note_id not found")
+        notes.find { it.note_id == note_id }?.also { it.isDeleted = true }?.also { notes.remove(it) }
+            ?.let { deletedNotes.add(it) }?.run { return true } ?: throw NoteNotFoundException("Note $note_id not found")
     }
 
     fun createComment(note_id: Int, user_id: Int, message: String): Int {
-        notes.find { it.note_id == note_id }?.also { it.comment.add(Comment(++comment_id, uid = user_id, message)) }?.
-        run { return comment_id } ?: throw NoteNotFoundException("Note $note_id not found")
+        notes.find { it.note_id == note_id }?.also { it.comment.add(Comment(++comment_id, uid = user_id, message)) }
+            ?.run { return comment_id } ?: throw NoteNotFoundException("Note $note_id not found")
     }
 
     fun getComments(note_id: Int, sort: Int = 0): MutableList<Comment> {
-        notes.find { it.note_id == note_id }?.also { it.comment.sortBy { comment ->  comment.date }}?.also { it.comment.reverse() }?.
-        also { if (sort == 1) it.comment.reverse() }?.run { return comment } ?: throw NoteNotFoundException("Note $note_id not found")
+        notes.find { it.note_id == note_id }?.also { it.comment.sortBy { comment -> comment.date } }
+            ?.also { it.comment.reverse() }?.also { if (sort == 1) it.comment.reverse() }?.run { return comment } ?: throw NoteNotFoundException("Note $note_id not found")
     }
 
     fun editComment(comment_id: Int, user_id: Int, message: String): Boolean {  // редактировать комментарий может только его автор
         for (note in notes) {
             note.comment.find { it.comment_id == comment_id && !it.isDeleted }?.
-            also { if (it.uid == user_id) { it.message = message } else throw AccessDeniedException("Access denied")}?.run { return true }
+            also {if (it.uid == user_id) { it.message = message } else throw AccessDeniedException("Access denied") }?.run { return true }
         }
         throw CommentNotFoundException("Comment $comment_id not found")
     }
@@ -112,7 +105,7 @@ object NoteService {
     fun deleteComment(comment_id: Int, user_id: Int): Boolean {     // удалить комментарий может только его автор или владелец заметки
         for (note in notes) {
             note.comment.find { it.comment_id == comment_id && !it.isDeleted }?.
-            also { if (it.uid == user_id || note.owner_id == user_id) { it.isDeleted = true } else throw AccessDeniedException("Access denied")}?.run { return true }
+            also {if (it.uid == user_id || note.owner_id == user_id) { it.isDeleted = true } else throw AccessDeniedException("Access denied") }?.run { return true }
         }
         throw CommentNotFoundException("Comment $comment_id not found")
     }
@@ -120,7 +113,7 @@ object NoteService {
     fun restoreComment(comment_id: Int, user_id: Int): Boolean {     // Восстановить комментарий может только его автор или владелец заметки
         for (note in notes) {
             note.comment.find { it.comment_id == comment_id && it.isDeleted }?.
-            also { if (it.uid == user_id || note.owner_id == user_id) { it.isDeleted = false } else throw AccessDeniedException("Access denied")}?.run { return true }
+            also {if (it.uid == user_id || note.owner_id == user_id) { it.isDeleted = false } else throw AccessDeniedException("Access denied") }?.run { return true }
         }
         throw CommentNotFoundException("Comment $comment_id not found")
     }
@@ -159,7 +152,7 @@ fun main() {
     println(NoteService.getById(2))
 
     println("\nВозвращаем список заметок, созданных пользователем")
-    println(NoteService.get(1,1))
+    println(NoteService.get(1,0))
 
     println("\nУдаляем заметку")
     println(NoteService.delete(1))
