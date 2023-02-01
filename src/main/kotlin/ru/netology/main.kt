@@ -1,15 +1,15 @@
 package ru.netology
 
-//import java.time.Instant
-//import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 //  расчет текущего времени
 val timestamp = System.currentTimeMillis()
-//val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
-//val sdfFormat = sdf.format(timestamp)
+val sdf = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+val sdfFormat = sdf.format(timestamp)
 
 //  расчет World Time API
-//val timestampApi = DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp / 1000))
+val timestampApi = DateTimeFormatter.ISO_INSTANT.format(Instant.ofEpochSecond(timestamp / 1000))
 
 class NoteNotFoundException(message: String) : RuntimeException(message)
 class CommentNotFoundException(message: String) : RuntimeException(message)

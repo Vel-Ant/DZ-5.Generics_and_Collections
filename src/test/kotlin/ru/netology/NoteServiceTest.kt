@@ -14,7 +14,7 @@ class NoteServiceTest {
 
     @Test
     fun addNewNote() {
-        val result = NoteService.add("Тест(1) - заголовок", "Тестовая заметка - 1", 1)
+        val result = NoteService.add("Тест(1) - заголовок", "Тестовая заметка - 1", 0)
 
         assertEquals(1, result)
     }
@@ -30,7 +30,7 @@ class NoteServiceTest {
 
     @Test (expected = NoteNotFoundException::class)
     fun getByIdException() {
-        NoteService.add("Тест(1) - заголовок", "Тестовая заметка - 1", 1)
+        NoteService.add("Тест(1) - заголовок", "Тестовая заметка - 1", 0)
 
         NoteService.getById(3)
     }
@@ -70,7 +70,7 @@ class NoteServiceTest {
         NoteService.add("Тест(1) - заголовок", "Тестовая заметка - 1", 1)
         NoteService.add("Тест(3) - заголовок", "Тестовая заметка - 3", 1)
 
-        NoteService.edit(3, "Test(1) - heading", "Test note in English - 1")
+        NoteService.edit(8, "Test(1) - heading", "Test note in English - 1")
     }
 
     @Test
